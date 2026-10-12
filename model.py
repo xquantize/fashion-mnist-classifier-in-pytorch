@@ -61,8 +61,45 @@ class FashionDataset(Dataset):
     def __getitem__(self, i):
         return (self.X[i] - self.mean) / self.std, self.y[i]
 
-# Step 3 - make_loaders (not yet solved)
-# TODO: implement
+# Step 3 - make_loaders
+from collections.abc import Mapping
+
+def _unpack(data):
+    if isinstance(data, Mapping):
+        return data["X_train"], data["y_train"], data["X_test"], data["y_test"]
+
+    if isinstance(data, (tuple, list)):
+        if len(data) == 4:
+            return tuple(data)
+        if len(data) == 2 and all(isinstance(p, (tuple, list)) and len(p) == 2 for p in data):
+            (X_tr, y_tr), (X_te, y_te) = data
+            return X_tr, y_tr, X_te, y_te
+
+    raise TypeError(
+        "make_loaders expected the dict returned by load_fashion_mnist, got "
+        f"{type(data).__name__} (shape={getattr(data, 'shape', None)}, len={len(data) if hasattr(data, '__len__') else None})"
+    )
+
+
+def make_loaders(data, batch_size=64, val_size=2000, seed=42):
+    X, y, X_test, y_test = _unpack(data)
+    n_train = len(X) - val_size
+
+    if n_train <= 0:
+        raise ValueError(f"val_size={val_size} leaves no training data (have {len(X)} images)")
+
+    train_ds = FashionDataset(X[:n_train], y[:n_train])
+    val_ds = FashionDataset(X[n_train:], y[n_train:])
+    test_ds = FashionDataset(X_test, y_test)
+
+    generator = torch.Generator().manual_seed(seed)
+
+    return {
+        "train": DataLoader(train_ds, batch_size=batch_size, shuffle=True, generator=generator),
+        "val": DataLoader(val_ds, batch_size=batch_size, shuffle=False),
+        "test": DataLoader(test_ds, batch_size=batch_size, shuffle=False),
+        "sizes": (len(train_ds), len(val_ds), len(test_ds)),
+    }
 
 # Step 4 - MLP (not yet solved)
 # TODO: implement
