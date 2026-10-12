@@ -11,7 +11,7 @@ python scaffold.py
 ## Steps
 
 - [x] **1.** load_fashion_mnist
-- [ ] **2.** FashionDataset
+- [x] **2.** FashionDataset
 - [ ] **3.** make_loaders
 - [ ] **4.** MLP
 - [ ] **5.** train_one_epoch
