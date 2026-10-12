@@ -138,8 +138,25 @@ def train_one_epoch(model, loader, loss_fn, optimizer):
 
     return total_loss / n_batches if n_batches else 0.0
 
-# Step 6 - evaluate (not yet solved)
-# TODO: implement
+# Step 6 - evaluate
+def evaluate(model, loader, loss_fn):
+    model.eval()
+    total_loss = 0.0
+    correct = 0
+    n_examples = 0
+
+    with torch.no_grad():
+        for X, y in loader:
+            logits = model(X)
+            batch_size = y.size(0)
+            total_loss += loss_fn(logits, y).item() * batch_size
+            correct += (logits.argmax(dim=1) == y).sum().item()
+            n_examples += batch_size
+
+    if n_examples == 0:
+        return 0.0, 0.0
+
+    return total_loss / n_examples, correct / n_examples
 
 # Step 7 - fit (not yet solved)
 # TODO: implement
