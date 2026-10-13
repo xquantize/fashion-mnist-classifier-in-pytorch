@@ -271,6 +271,17 @@ def load_model(path):
 
     return model
 
-# Step 12 - predict_classes (not yet solved)
-# TODO: implement
+# Step 12 - predict_classes
+CLASS_NAMES = ['T-shirt/top', 'Trouser', 'Pullover', 'Dress', 'Coat', 'Sandal', 'Shirt', 'Sneaker', 'Bag', 'Ankle boot']
+
+def predict_classes(model, images):
+    x = np.asarray(images).reshape(-1, 28, 28).astype(np.float32) / 255.0
+    x = (torch.from_numpy(x) - 0.2860) / 0.3530
+
+    model.eval()
+    
+    with torch.no_grad():
+        preds = model(x).argmax(dim=1)
+
+    return [CLASS_NAMES[i] for i in preds.tolist()]
 
